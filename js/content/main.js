@@ -158,47 +158,48 @@ var Pool = {
 		}
 
 		// start progress
-		new Promise(function(res, rej){
-			chrome.runtime.sendMessage({action: "getKey"}, function(response){ res(response); });	
-		}).then(function(key){
-			currentKey = key || "";
-			var promises = treeAjaxItems.map(function(item){
-				var fetchedUrl = item.url + "?recursive=1" + (currentKey? ("&access_token=" + currentKey) : "");
-				return callAjax(fetchedUrl).then(function(treeRes){
-     				treeRes.tree.forEach(function(blobItem){
-     					if(blobItem.type == "blob"){
-     						var path = item.title + "/" + blobItem.path;
-     						blobAjaxCollection.push({ path: path, blobUrl: blobItem.url });
-     						self.log(path + " url fetched.");
-     					}
-     				});
+		browser.runtime
+			.sendMessage({action: "getKey"})
+			.then(function(key){
+				currentKey = key || "";
+				var promises = treeAjaxItems.map(function(item){
+					var fetchedUrl = item.url + "?recursive=1" + (currentKey? ("&access_token=" + currentKey) : "");
+					return callAjax(fetchedUrl).then(function(treeRes){
+	     				treeRes.tree.forEach(function(blobItem){
+	     					if(blobItem.type == "blob"){
+	     						var path = item.title + "/" + blobItem.path;
+	     						blobAjaxCollection.push({ path: path, blobUrl: blobItem.url });
+	     						self.log(path + " url fetched.");
+	     					}
+	     				});
+					});
 				});
+				return Promise.all(promises);
+			})
+			.then(function(){
+				self.log("Collect blob contents...");
+				var promises = blobAjaxCollection.map(function(item){
+		 			var fetchedUrl = item.blobUrl + (currentKey? ("?access_token=" + currentKey) : "");
+		 			return callAjax(fetchedUrl).then(function(blobRes){
+		 				fileContents.push({ path: item.path, content: blobRes.content });
+		 				self.log(item.path + " content has collected.");
+		 			});
+		 		});
+		 		return Promise.all(promises);
+			})
+			.then(function(){
+				self.log("Zip contents and trigger download...");
+				return zipContents([resolvedUrl.project].concat(resolvedUrl.path.split('/')).join('-'), fileContents);
+			})
+			.then(function(){ self.reset(); })
+			.catch(function(err){
+				console.log(err);
+				var message = err.message? err.message : err;
+				self.log(message);
+				if (message.indexOf("rate limit exceeded") >= 0){
+					self.log("<strong style='color:red;'>Please press GitZip extension icon to get token or input your token.</strong>");
+				}
 			});
-			return Promise.all(promises);
-		}).then(function(){
-			self.log("Collect blob contents...");
-			var promises = blobAjaxCollection.map(function(item){
-	 			var fetchedUrl = item.blobUrl + (currentKey? ("?access_token=" + currentKey) : "");
-	 			return callAjax(fetchedUrl).then(function(blobRes){
-	 				fileContents.push({ path: item.path, content: blobRes.content });
-	 				self.log(item.path + " content has collected.");
-	 			});
-	 		});
-	 		return Promise.all(promises);
-		}).then(function(){
-			self.log("Zip contents and trigger download...");
-			return zipContents([resolvedUrl.project].concat(resolvedUrl.path.split('/')).join('-'), fileContents);
-		}).then(function(){
-			self.reset();
-		}).catch(function(err){
-			console.log(err);
-			var message = err.message? err.message : err;
-			self.log(message);
-			if (message.indexOf("rate limit exceeded") >= 0){
-				self.log("<strong style='color:red;'>Please press GitZip extension icon to get token or input your token.</strong>");
-			}
-		});
-		
 	},
 	log: function(message){
 		this._dashBody.innerHTML += message + "<br/>";

@@ -8,17 +8,21 @@ function _getCookie(name) {
 	return null;
 }
 
-chrome.runtime.sendMessage({action: "getKey"}, function(response){ 
-	if(typeof response == 'string' && !response){
-		// means not exist in extension
-		var val = _getCookie(window.ACCESS_TOKEN_COOKIE_NAME);
-		if(val){
-			// exist
-			chrome.runtime.sendMessage({action: "setKey", value: val}, function(response){
-				window.alert(response || "Token has sync to GitZip Extension");
-			});
-		}else{
-			// not exist in kinolien.github.io/gitzip/
+browser.runtime
+	.sendMessage({action: "getKey"})
+	.then(function(response){ 
+		if(typeof response == 'string' && !response){
+			// means not exist in extension
+			var val = _getCookie(window.ACCESS_TOKEN_COOKIE_NAME);
+			if(val){
+				// exist
+				browser.runtime
+					.sendMessage({action: "setKey", value: val})
+					.then(function(response){
+						window.alert(response || "Token has sync to GitZip Extension");
+					});
+			}else{
+				// not exist in kinolien.github.io/gitzip/
+			}
 		}
-	}
-});	
+	})

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	var tokenlink = form.querySelector('.gettoken-link');
 	var tip = form.querySelector('.tip-left');
 	form.addEventListener('submit', function(){
-		chrome.runtime.sendMessage({action: "setKey", value: input.value}, function(response){});
+		browser.runtime.sendMessage({action: "setKey", value: input.value});
 		window.close();
 	});
 
@@ -15,17 +15,19 @@ document.addEventListener('DOMContentLoaded', function() {
 		if(tip) tip.style.cssText += "display:block;";
 	});
 
-	chrome.runtime.sendMessage({action: "getKey"}, function(response){
-		input.value = response;
-	});
+	browser.runtime
+		.sendMessage({action: "getKey"})
+		.then(function(response){
+			input.value = response;
+		});
 
-	chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+	browser.tabs.query({currentWindow: true, active: true}, function(tabs){
 		var tab = tabs[0];
 		if(tab && tab.url){
-			tokenlink.href += encodeURIComponent(tabs[0].url);
+			tokenlink.href += encodeURIComponent(tab.url);
 			tokenlink.addEventListener('click', function(e){
 				e.preventDefault();
-				chrome.tabs.update(tab.id, {url: tokenlink.href});
+				browser.tabs.update(tab.id, {url: tokenlink.href});
 				window.close();
 			});
 		}
