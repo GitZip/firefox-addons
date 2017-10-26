@@ -1,6 +1,12 @@
 // It would work on github.com
 
 var repoExp = new RegExp("^https://github.com/([^/]+)/([^/]+)(/(tree|blob)/([^/]+)(/(.*))?)?");
+
+function showGitzipIcon(){
+	// just show the icon
+	browser.runtime.sendMessage({action: "showIcon"});
+}
+
 /**
  * Resolve the github repo url for recognize author, project name, branch name, and so on.
  * @private
@@ -64,7 +70,7 @@ function callAjax(url){
 	        		reject(xmlhttp.response);
 	        	}
 	        }
-	    }
+	    };
 	    xmlhttp.responseType = "json";
 	    xmlhttp.open("GET", url, true);
 	    xmlhttp.send();
@@ -238,6 +244,9 @@ function onItemDblClick(e){
 
 function initElements(){
 	
+	// show icon in every github page.
+	showGitzipIcon();
+
 	function appendToIcons(){
 		var items = document.querySelectorAll(itemCollectSelector);
 		var itemLen = items.length;
