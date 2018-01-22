@@ -182,8 +182,8 @@ var Pool = {
 			// ga
 			var looklink = item.closest("tr").querySelector("td.content a");
 			if(looklink){
-				var baseRepo = ["", resolvedUrl.author, resolvedUrl.project].join("/");
-				var githubUrl = looklink.getAttribute("href");
+				var baseRepo = [resolvedUrl.author, resolvedUrl.project].join("/");
+				var githubUrl = looklink.getAttribute("href").substring(1); // ignore slash "/" from begin
 				browser.runtime.sendMessage({
 					action: "gaTrack",
 					baseRepo: baseRepo,
@@ -353,5 +353,5 @@ function hookMutationObserver(){
 
 // Property run_at is "document_end" as default in Content Script
 // refers: https://developer.chrome.com/extensions/content_scripts
-initElements();
 hookMutationObserver();
+initElements();
