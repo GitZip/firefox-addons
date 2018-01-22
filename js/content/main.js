@@ -179,6 +179,19 @@ var Pool = {
 				blobAjaxCollection.push({ path: title, blobUrl: url });	
 				self.log(title + " url fetched.")
 			}
+			// ga
+			var looklink = item.closest("tr").querySelector("td.content a");
+			if(looklink){
+				var baseRepo = ["", resolvedUrl.author, resolvedUrl.project].join("/");
+				var githubUrl = looklink.getAttribute("href");
+				browser.runtime.sendMessage({
+					action: "gaTrack",
+					baseRepo: baseRepo,
+					githubUrl: githubUrl,
+					userAction: "collected"
+				});
+			}
+
 		}
 
 		// start progress
