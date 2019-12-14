@@ -5,15 +5,8 @@
     "description": "It can make the sub-directories and files of github repository as zip and download it",
     "version": "0.2.2",
 
-    "icons": {
-        "16": "images/icon-16px.png",
-        "32": "images/icon-32px.png",
-        "48": "images/icon-48px.png",
-        "128": "images/icon-128px.png"
-    },
-
     "page_action": {
-        "default_icon": "images/icon-48px.png",
+        "default_icon": "images/icon-empty.png",
         "default_popup": "popup.html"
     },
 

@@ -11,11 +11,53 @@
 
 // ga('send', 'pageview', '/background.html');
 
+function dynamicChangeColor(tabId) {
+	var canvas = document.createElement("canvas");
+	var ctx = canvas.getContext("2d");
+
+	var poolimg = new Image();
+
+	poolimg.onload = function () {
+		//draw background image
+		ctx.drawImage(poolimg, 0, 0);
+
+		var imageData = ctx.getImageData(0, 0, 128, 128);
+
+		var outputData = ctx.createImageData(128, 128);
+
+		browser.theme.getCurrent()
+			.then(function(theme){
+				var matches;
+				if ( theme.colors && theme.colors.icons && ( matches = theme.colors.icons.match(/rgb(a)?\((.*)\)/) ) ) {
+					var colorSets = matches.pop().split(",").map(function(str){ return str.trim(); });
+
+					var pureColors = colorSets.slice(0, 3).map(function(str){ return parseInt(str); });
+					var alphaRatio = parseFloat(colorSets[3]) || 1;
+
+					for (var i = 0; i < imageData.data.length; i += 4) {
+						outputData.data[i + 0] = pureColors[0];
+						outputData.data[i + 1] = pureColors[1];
+						outputData.data[i + 2] = pureColors[2];
+						outputData.data[i + 3] = Math.floor(imageData.data[i + 3] * alphaRatio);
+					}
+				}
+				browser.pageAction.setIcon({
+					tabId: tabId, 
+					imageData: outputData
+				});
+				browser.pageAction.show(tabId);
+			});
+	};
+
+	poolimg.src = browser.runtime.getURL("images/icon-128px.png");
+}
+
 // Received a message from content script
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	switch (request.action){
 		case "showIcon":
-			return browser.pageAction.show(sender.tab.id);
+			dynamicChangeColor(sender.tab.id);
+			return true;
 		case "getKey":
 			return browser.storage.sync.get("gitzip-github-token")
 				.then(function(res){ return res["gitzip-github-token"] || ""; });
