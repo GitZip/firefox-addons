@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	var form = document.getElementById('tokenForm');
 	var input = document.getElementById('tokenInput');
-	var tokenlinks = form.querySelector('.gettoken-link');
+	var tokenlinks = form.querySelectorAll('.gettoken-link');
 	var tip = form.querySelector('.tip-left');
 	form.addEventListener('submit', function(){
 		browser.runtime.sendMessage({action: "setKey", value: input.value});
