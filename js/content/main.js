@@ -57,7 +57,7 @@ var zipContents = function(filename, contents){
     });	
 };
 
-function callAjax(url){
+function callAjax(url, token){
 	return new Promise(function(resolve, reject){
 		var xmlhttp;
 	    // compatible with IE7+, Firefox, Chrome, Opera, Safari
@@ -73,6 +73,7 @@ function callAjax(url){
 	    };
 	    xmlhttp.responseType = "json";
 	    xmlhttp.open("GET", url, true);
+	    if ( token ) xmlhttp.setRequestHeader("Authorization", "token " + token);
 	    xmlhttp.send();
 	});
 }
@@ -200,8 +201,8 @@ var Pool = {
 			.then(function(key){
 				currentKey = key || "";
 				var promises = treeAjaxItems.map(function(item){
-					var fetchedUrl = item.url + "?recursive=1" + (currentKey? ("&access_token=" + currentKey) : "");
-					return callAjax(fetchedUrl).then(function(treeRes){
+					var fetchedUrl = item.url + "?recursive=1";
+					return callAjax(fetchedUrl, currentKey).then(function(treeRes){
 	     				treeRes.tree.forEach(function(blobItem){
 	     					if(blobItem.type == "blob"){
 	     						var path = item.title + "/" + blobItem.path;
@@ -216,8 +217,8 @@ var Pool = {
 			.then(function(){
 				self.log("Collect blob contents...");
 				var promises = blobAjaxCollection.map(function(item){
-		 			var fetchedUrl = item.blobUrl + (currentKey? ("?access_token=" + currentKey) : "");
-		 			return callAjax(fetchedUrl).then(function(blobRes){
+		 			var fetchedUrl = item.blobUrl;
+		 			return callAjax(fetchedUrl, currentKey).then(function(blobRes){
 		 				fileContents.push({ path: item.path, content: blobRes.content });
 		 				self.log(item.path + " content has collected.");
 		 			});
