@@ -42,8 +42,11 @@ function getGitUrl(author, project, type, sha){
 
 var zipContents = function(filename, contents){
     var zip = new JSZip();
+    var currDate = new Date();
+	var dateWithOffset = new Date(currDate.getTime() - currDate.getTimezoneOffset() * 60000);
+
     contents.forEach(function(item){
-        zip.file(item.path, item.content, {createFolders:true,base64:true});
+        zip.file(item.path, item.content, { createFolders:true, base64:true, date: dateWithOffset });
     });
     return new Promise(function(res, rej){
     	zip.generateAsync({type:"blob"})
