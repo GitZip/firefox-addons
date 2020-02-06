@@ -236,6 +236,9 @@ var Pool = {
 				if (message.indexOf("rate limit exceeded") >= 0){
 					self.log("<strong style='color:red;'>Please press GitZip extension icon to get token or input your token.</strong>");
 				}
+				if (message.indexOf("Bad credentials") >= 0){
+					self.log("<strong style='color:red;'>Your token has expired, please get token again.</strong>");
+				}
 			});
 	},
 	log: function(message){
