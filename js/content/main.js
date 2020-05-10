@@ -41,12 +41,15 @@ function getGitUrl(author, project, type, sha){
 }
 
 var zipContents = function(filename, contents){
-    var zip = new JSZip();
-    var currDate = new Date();
+	var currDate = new Date();
 	var dateWithOffset = new Date(currDate.getTime() - currDate.getTimezoneOffset() * 60000);
+	// replace the default date with dateWithOffset
+	JSZip.defaults.date = dateWithOffset;
+
+	var zip = new JSZip();
 
     contents.forEach(function(item){
-        zip.file(item.path, item.content, { createFolders:true, base64:true, date: dateWithOffset });
+        zip.file(item.path, item.content, { createFolders:true, base64:true });
     });
     return new Promise(function(res, rej){
     	zip.generateAsync({type:"blob"})
