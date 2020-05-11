@@ -3,7 +3,7 @@
 
     "name": "GitZip",
     "description": "It can make the sub-directories and files of github repository as zip and download it",
-    "version": "0.2.6",
+    "version": "0.2.7",
 
     "page_action": {
         "default_icon": "images/icon-empty.png",
@@ -17,6 +17,7 @@
     "permissions": [
         "storage",
         "activeTab",
+        "theme",
         "*://github.com/*",
         "https://api.github.com/repos/*"
     ],
