@@ -84,8 +84,7 @@ function callAjax(url, token){
 	});
 }
 
-
-var itemCollectSelector = ".repository-content .js-navigation-container tr.js-navigation-item:not(.up-tree)";
+var itemCollectSelector = ".repository-content .js-navigation-item";
 
 var Pool = {
 	_locked: false,
@@ -271,12 +270,12 @@ function createMark(parent, height, title, type, sha){
 }
 
 function checkHaveAnyCheck(){
-	var checkItems = document.querySelectorAll(itemCollectSelector + " td.icon p.gitzip-show");
+	var checkItems = document.querySelectorAll(itemCollectSelector + " p.gitzip-show");
 	return checkItems.length? checkItems : false;
 }
 
 function onItemDblClick(e){
-	var markTarget = e.target.closest("tr.js-navigation-item").querySelector('td.icon p.gitzip-check-mark');
+	var markTarget = e.target.closest(".js-navigation-item").querySelector('p.gitzip-check-mark');
 	if(markTarget) markTarget.classList.toggle("gitzip-show");
 	!!checkHaveAnyCheck()? Pool.show() : Pool.hide();
 }
@@ -291,15 +290,14 @@ function hookItemEvents(){
 		var itemLen = items.length;
 		if(itemLen){
 			for(var i = 0; i < itemLen; i++){
-				var item = items[i],
-					icon = item.querySelector("td.icon"),
-					link = item.querySelector("td.content a"),
-					blob = icon.querySelector(".octicon-file-text, .octicon-file"),
-					tree = icon.querySelector(".octicon-file-directory");
+				var item = items[i],					
+					link = item.querySelector("a[id]"),
+					blob = item.querySelector(".octicon-file-text, .octicon-file"),
+					tree = item.querySelector(".octicon-file-directory");
 				
 				if(link && (tree || blob)){
 					createMark(
-						icon, 
+						item, 
 						item.offsetHeight, 
 						link.textContent, 
 						tree? "tree" : "blob", 
@@ -312,30 +310,27 @@ function hookItemEvents(){
 	}
 
 	var lazyCaseObserver = null;
-	var fileWrap = document.querySelector(".repository-content .file-wrap");
+	var repoContent = document.querySelector(".repository-content");
+	var lazyElement = repoContent ? repoContent.querySelector("include-fragment .js-details-container") : null;
 
-	if(fileWrap && fileWrap.tagName.toLowerCase() == "include-fragment"){
+	if(lazyElement){
 		// lazy case
-		var lazyTarget = document.querySelector(".repository-content");
-		if(lazyTarget){
-			lazyCaseObserver = new MutationObserver(function(mutations) {
-				mutations.forEach(function(mutation) {
-					var addNodes = mutation.addedNodes;
-					addNodes && addNodes.length && addNodes.forEach(function(el){
-						if(el.classList && el.classList.contains("file-wrap") && lazyCaseObserver){
-							// console.log("in mutation adds");
-							appendToIcons();
-							lazyCaseObserver.disconnect();
-							lazyCaseObserver = null;
-						}
-					});
-				});    
-			});
-			lazyCaseObserver.observe(lazyTarget, { childList: true } );
-		}
+		lazyCaseObserver = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				var addNodes = mutation.addedNodes;
+				addNodes && addNodes.length && addNodes.forEach(function(el){
+					if(el.classList && el.classList.contains("js-details-container") && lazyCaseObserver){
+						appendToIcons();
+						lazyCaseObserver.disconnect();
+						lazyCaseObserver = null;
+					}
+				});
+			});    
+		});
+		lazyCaseObserver.observe(repoContent, { childList: true, subtree: true } );
+	} else {
+		appendToIcons();
 	}
-
-	appendToIcons();
 
 	Pool.init();
 }
@@ -354,7 +349,7 @@ function hookMutationObserver(){
 	});
 	 
 	// pass in the target node, as well as the observer options
-	observer.observe(target, { childList: true } );
+	target && observer.observe(target, { childList: true } );
 	 
 	// later, you can stop observing
 	// observer.disconnect();
