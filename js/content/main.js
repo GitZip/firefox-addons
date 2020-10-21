@@ -40,6 +40,12 @@ function getGitUrl(author, project, type, sha){
 	}else return false;	
 }
 
+function getInfoUrl(author, project, path, branch) {
+	return "https://api.github.com/repos/"
+		 + author + "/" + project + "/contents/"
+		 + path + (branch ? ("?ref=" + branch) : "");
+}
+
 var zipContents = function(filename, contents){
 	var currDate = new Date();
 	var dateWithOffset = new Date(currDate.getTime() - currDate.getTimezoneOffset() * 60000);
@@ -167,6 +173,7 @@ var Pool = {
 		var treeAjaxItems = [];
 		var blobAjaxCollection = [];
 		var fileContents = [];
+		var infoAjaxItems = [];
 		var resolvedUrl = resolveUrl(window.location.href);
 		var currentKey = "";
 
@@ -174,17 +181,16 @@ var Pool = {
 
 		for(var idx = 0, len = checkedItems.length; idx < len; idx++){
 			var item = checkedItems[idx],
-				sha = item.getAttribute('gitzip-sha'),
+				href = item.getAttribute('gitzip-href'),
 				type = item.getAttribute('gitzip-type'),
-				title = item.getAttribute('gitzip-title'),
-				url = getGitUrl(resolvedUrl.author, resolvedUrl.project, type, sha);
+				title = item.getAttribute('gitzip-title');
 
-			if(type == "tree"){
-				treeAjaxItems.push({ title: title, url: url });
-			}else{
-				blobAjaxCollection.push({ path: title, blobUrl: url });	
-				self.log(title + " url fetched.")
-			}
+			infoAjaxItems.push({
+				type: type,
+				title: title,
+				href: href
+			});
+
 			// ga
 			// var looklink = item.closest("tr").querySelector("td.content a");
 			// if(looklink){
@@ -205,6 +211,28 @@ var Pool = {
 			.sendMessage({action: "getKey"})
 			.then(function(key){
 				currentKey = key || "";
+				var infoUrl = getInfoUrl(resolvedUrl.author, resolvedUrl.project, resolvedUrl.path, resolvedUrl.branch);
+				return callAjax(infoUrl, currentKey).then(function(listRes){
+					listRes
+						.filter(function(item){
+							return infoAjaxItems.some(function(info){
+								return info.title == item.name && (
+									(info.type == 'tree' && item.type == 'dir') || 
+									(info.type == 'blob' && item.type == 'file')
+								);
+							});
+						})
+						.forEach(function(item){
+							if(item.type == "dir"){
+								treeAjaxItems.push({ title: item.name, url: item.git_url });
+							}else{
+								blobAjaxCollection.push({ path: item.name, blobUrl: item.git_url });	
+								self.log(item.name + " url fetched.")
+							}	
+						});
+				});
+			})
+			.then(function(){
 				var promises = treeAjaxItems.map(function(item){
 					var fetchedUrl = item.url + "?recursive=1";
 					return callAjax(fetchedUrl, currentKey).then(function(treeRes){
@@ -254,13 +282,13 @@ var Pool = {
 	}
 };
 
-function createMark(parent, height, title, type, sha){
+function createMark(parent, height, title, type, href){
 	if(parent && !parent.querySelector("p.gitzip-check-mark")){
 		var checkp = document.createElement('p');
 
 		checkp.setAttribute("gitzip-title", title);
 		checkp.setAttribute("gitzip-type", type);
-		checkp.setAttribute("gitzip-sha", sha);
+		checkp.setAttribute("gitzip-href", href);
 		checkp.className = "gitzip-check-mark";
 		checkp.appendChild(document.createTextNode("\u2713"));
 		checkp.style.cssText = "line-height:" + height + "px;";
@@ -291,7 +319,7 @@ function hookItemEvents(){
 		if(itemLen){
 			for(var i = 0; i < itemLen; i++){
 				var item = items[i],					
-					link = item.querySelector("a[id]"),
+					link = item.querySelector("a[href]"),
 					blob = item.querySelector(".octicon-file-text, .octicon-file"),
 					tree = item.querySelector(".octicon-file-directory");
 				
@@ -301,7 +329,7 @@ function hookItemEvents(){
 						item.offsetHeight, 
 						link.textContent, 
 						tree? "tree" : "blob", 
-						link.id.split('-')[1]
+						link.href
 					);
 					item.addEventListener("dblclick", onItemDblClick);
 				}
