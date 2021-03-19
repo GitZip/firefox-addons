@@ -100,6 +100,7 @@ var Pool = {
 		// create dom
 		// Make the dom on right bottom
 		var self = this;
+		var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 		if(!self._el){
 			var wrap = document.createElement('div'),
@@ -107,7 +108,7 @@ var Pool = {
 				down = document.createElement('p'),
 				tip = document.createElement('p');
 			
-			wrap.className = "gitzip-collect-wrap";
+			wrap.className = "gitzip-collect-wrap" + (isDark ? " gitzip-dark" : "");
 			dash.className = "gitzip-collect-dash";
 			down.className = "gitzip-collect-down";
 			tip.className = "gitzip-collect-tip";
