@@ -41,6 +41,10 @@
 	overflow: auto;
 }
 
+.gitzip-dark .gitzip-body{
+	color: #b3b3b3;
+}
+
 .gitzip-dark .gitzip-body p.warn, .gitzip-dark .gitzip-body p.error{
 	background-color: inherit;
 	border: none;
