@@ -100,6 +100,7 @@ var Pool = {
 		// create dom
 		// Make the dom on right bottom
 		var self = this;
+		var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 		if(!self._el){
 			var wrap = document.createElement('div'),
@@ -107,7 +108,7 @@ var Pool = {
 				down = document.createElement('p'),
 				tip = document.createElement('p');
 			
-			wrap.className = "gitzip-collect-wrap";
+			wrap.className = "gitzip-collect-wrap" + (isDark ? " gitzip-dark" : "");
 			dash.className = "gitzip-collect-dash";
 			down.className = "gitzip-collect-down";
 			tip.className = "gitzip-collect-tip";
@@ -323,7 +324,7 @@ function hookItemEvents(){
 					blob = item.querySelector(".octicon-file-text, .octicon-file"),
 					tree = item.querySelector(".octicon-file-directory");
 				
-				if(link && (tree || blob)){
+				if(!item._hasBind && link && (tree || blob)){
 					createMark(
 						item, 
 						item.offsetHeight, 
@@ -332,6 +333,7 @@ function hookItemEvents(){
 						link.href
 					);
 					item.addEventListener("dblclick", onItemDblClick);
+					item._hasBind = true;
 				}
 			}
 		}
@@ -339,7 +341,7 @@ function hookItemEvents(){
 
 	var lazyCaseObserver = null;
 	var repoContent = document.querySelector(".repository-content");
-	var lazyElement = repoContent ? repoContent.querySelector("include-fragment .js-details-container") : null;
+	var lazyElement = repoContent ? repoContent.querySelector(".js-navigation-container") : null;
 
 	if(lazyElement){
 		// lazy case
@@ -347,7 +349,7 @@ function hookItemEvents(){
 			mutations.forEach(function(mutation) {
 				var addNodes = mutation.addedNodes;
 				addNodes && addNodes.length && addNodes.forEach(function(el){
-					if(el.classList && el.classList.contains("js-details-container") && lazyCaseObserver){
+					if(el.classList && (el.classList.contains("js-details-container") || el.classList.contains("js-navigation-container"))){
 						appendToIcons();
 						lazyCaseObserver.disconnect();
 						lazyCaseObserver = null;
@@ -356,8 +358,10 @@ function hookItemEvents(){
 			});    
 		});
 		lazyCaseObserver.observe(repoContent, { childList: true, subtree: true } );
-	} else {
-		appendToIcons();
+	} 
+
+	if (document.querySelector(itemCollectSelector)) {
+		appendToIcons();	
 	}
 
 	Pool.init();
