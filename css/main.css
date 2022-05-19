@@ -10,8 +10,8 @@
 }
 
 *[class*="gitzip-"]{
-	transition:all 0.5s ease;
-	-webkit-transition:all 0.5s ease; /* Safari and Chrome */
+	transition:all 0.3s ease;
+	-webkit-transition:all 0.3s ease; /* Safari and Chrome */
 }
 
 .gitzip-show{
@@ -34,15 +34,43 @@
 	border-bottom: 1px solid #222;
 }
 
+.gitzip-close{
+	float: right;
+	font-weight: 800;
+	cursor: pointer;
+	visibility: hidden;
+}
+
+.gitzip-fail .gitzip-close{
+	visibility: visible;
+}
+
 .gitzip-body{
-	margin: 15px;
-	padding: 0px;
+	margin: 10px 0;
 	height: 246px;
 	overflow: auto;
 }
 
-.gitzip-dark .gitzip-body{
-	color: #b3b3b3;
+.gitzip-body p{
+	margin: 0;
+	padding: 0 15px;
+	color: #333;
+}
+
+.gitzip-dark .gitzip-body p{
+	color: #f0f6fc;
+}
+
+.gitzip-body p.warn{
+	background-color: #fffbe7;
+	color: #624115;
+	border: 1px solid #fff4c7;
+}
+
+.gitzip-body p.error{
+	background-color: #fff0f0;
+	color: #ff081e;
+	border: 1px solid #ffd6d6;
 }
 
 .gitzip-dark .gitzip-body p.warn, .gitzip-dark .gitzip-body p.error{
@@ -63,30 +91,60 @@
 
 .gitzip-check-mark{
 	position: absolute; 
-	left: -10px;
+    left: -10px;
     top: 0px;
 	font-size: 18px;
 	margin:0 !important;
 	visibility: hidden;
 	opacity: 0;
+	color: #333;
+}
+
+.gitzip-dark.gitzip-check-mark{
+	color: #f0f6fc;
+}
+
+.gitzip-check-wrap{
+	position: absolute;
+    left: -5px;
+    top: 0px;
+    height: 100%;
+    display: none;
+    align-items: center;
 }
 
 .gitzip-collect-wrap{
 	position: fixed;
 	right: 28px;
 	bottom: 28px;
-	visibility: hidden;
-  	opacity: 0;
-  	z-index: 1000;
-  	width: 56px;
-  	height: 56px;
+	z-index: 1000;
 }
 
-.gitzip-collect-wrap:hover{
+.gitzip-collect-arrow{
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	visibility: hidden;
+  	opacity: 0;
+  	width: 56px;
+  	height: 56px;
+  	color: #333;
+}
+
+.gitzip-dark .gitzip-collect-arrow{
+	color: #f0f6fc;
+}
+
+.gitzip-collect-arrow:hover{
 	width: 270px;
 	height: 65px;
 	border-radius: 8px;
-	background-color: black;
+	color: #f0f6fc;
+	background-color: #333;
+}
+
+.gitzip-dark .gitzip-collect-arrow:hover{
+	background-color: transparent;	
 }
 
 .gitzip-collect-down{
@@ -101,18 +159,18 @@
 	bottom: 4px;
 }
 
-.gitzip-collect-wrap:hover .gitzip-collect-down{
-	color: #fff;
-}
-
 .gitzip-collect-dash{
     box-shadow: 1px 1px 10px 0px #d0d0d0;
     background-color: #fff;
     border-radius: 4px;
     border: 1px solid #ddd;
-    display: none;
     visibility: hidden;
   	opacity: 0;
+  	position: absolute;
+  	right: 0;
+  	bottom: 0;
+  	width: 0px;
+  	height: 0px;
 }
 
 .gitzip-dark .gitzip-collect-dash {
@@ -122,6 +180,7 @@
 }
 
 .gitzip-downloading .gitzip-collect-dash{
+	width: 100%;
 	height: 100%;
 	display: block;
 	visibility: visible;
@@ -142,9 +201,8 @@
     padding-left:10px;
 }
 
-.gitzip-collect-wrap:hover .gitzip-collect-tip{
+.gitzip-collect-arrow:hover .gitzip-collect-tip{
 	visibility: visible; opacity: 1;
-	color: #fff;
 	left: 0px;
 }
 

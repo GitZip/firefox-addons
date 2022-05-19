@@ -1,35 +1,41 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
 
     "name": "GitZip",
     "description": "It can make the sub-directories and files of github repository as zip and download it",
-    "version": "0.3.2",
+    "version": "1.0.0",
 
-    "page_action": {
-        "default_icon": "images/icon-empty.png",
+    "icons": {
+        "128": "images/icon-128px.png"
+    },
+
+    "action": {
         "default_popup": "popup.html"
     },
 
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": false
+    },
+
     "background": {
-        "page": "background.html"
+        "service_worker": "js/background.js"
     },
 
     "permissions": [
+        "tabs",
         "storage",
-        "activeTab",
-        "theme",
-        "*://github.com/*",
-        "https://api.github.com/repos/*"
+        "contextMenus"
+    ],
+
+    "host_permissions": [
+        "https://api.github.com/*"
     ],
 
     "content_scripts": [
         {
             "matches": ["*://github.com/*"],
-            "js": [
-                "js/content/jszip.min.js",
-                "js/content/FileSaver.min.js",
-                "js/content/main.js"
-            ],
+            "js": ["js/content/jszip.min.js","js/content/FileSaver.min.js","js/content/main.js"],
             "css": ["css/main.css"]
         },
         {
@@ -42,9 +48,14 @@
         }
     ],
 
-    "applications": {
+    "browser_specific_settings": {
         "gecko": {
-            "id": "gitzip-firefox-addons@gitzip.org"
+            "id": "gitzip-firefox-addons@gitzip.org",
+            "strict_min_version": "42.0"
         }
+    },
+
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; worker-src 'self'"
     }
 }
