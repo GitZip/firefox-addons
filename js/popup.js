@@ -1,3 +1,33 @@
+
+let isDark = true;
+
+const defaultOptions = {
+	selectBehaviour: 'both',
+	theme: 'default'
+};
+
+function applyTheme() {
+	isDark && document.body.classList.add("dark-theme");
+	!isDark && document.body.classList.remove("dark-theme");
+}
+
+browser.storage.local.get(defaultOptions, function(items){
+	if (items) {
+		if (items.theme == "default") isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		else isDark = items.theme == "dark";
+		applyTheme();
+	}
+});
+
+browser.storage.onChanged.addListener(function(changes, area){
+	if (area == "local" && changes.theme) {
+		var newValue = changes.theme.newValue;
+		if (newValue == "default") isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		else isDark = newValue == "dark";
+		applyTheme();
+	}
+});
+
 // The DOMContentLoaded means the popup.html page has load. (trigger this event after click the ext icon)
 document.addEventListener('DOMContentLoaded', function() {
 	// alert("has loaded");
@@ -35,4 +65,5 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
+	applyTheme();
 }, false);
